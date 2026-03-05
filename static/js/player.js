@@ -682,8 +682,8 @@ function sfBuildCardHTML(v, t, c, th, thHQ) {
     sc +
     "','" +
     sth +
-    '\')" class="flex-1 flex items-center justify-center gap-1.5 bg-accent-500/15 text-accent-400 text-[11px] font-medium py-1.5 rounded-lg hover:bg-accent-500/25 transition-all">' +
-    '<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Play</button>' +
+    '\')" class="w-8 h-8 flex items-center justify-center bg-accent-500/15 text-accent-400 rounded-lg hover:bg-accent-500/25 transition-all" title="Play">' +
+    '<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>' +
     "<button onclick=\"event.stopPropagation();sfAddQ('" +
     sv +
     "','" +
@@ -1856,6 +1856,9 @@ document.addEventListener("keydown", (e) => {
     case "KeyL":
       sfToggleLyrics();
       break;
+    case "KeyV":
+      sfToggleVideo();
+      break;
     case "KeyM":
       if (sfReady) {
         if (sfPlayer.isMuted()) {
@@ -2188,8 +2191,8 @@ async function sfLoadDashboard() {
                 sc +
                 "','" +
                 sth +
-                '\')" class="flex-1 flex items-center justify-center gap-1.5 bg-accent-500/15 text-accent-400 text-[11px] font-medium py-1.5 rounded-lg hover:bg-accent-500/25 transition-all">' +
-                '<svg class="w-3 h-3" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>Play</button>' +
+                '\')" class="w-8 h-8 flex items-center justify-center bg-accent-500/15 text-accent-400 rounded-lg hover:bg-accent-500/25 transition-all" title="Play">' +
+                '<svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></button>' +
                 "<button onclick=\"event.stopPropagation();sfAddQ('" +
                 sv +
                 "','" +
@@ -2301,6 +2304,41 @@ function sfRegisterSW() {
   if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register(SF_BASE + "/sw.js").catch(() => {});
   }
+}
+
+// ═══════════════════════════════════
+//  VIDEO TOGGLE (PiP-style)
+// ═══════════════════════════════════
+let sfVideoVisible = false;
+
+function sfToggleVideo() {
+  sfVideoVisible = !sfVideoVisible;
+  const wrap = sfEl("ytWrap");
+  const btn = sfEl("sfVideoBtn");
+  if (!wrap) return;
+
+  if (sfVideoVisible) {
+    wrap.classList.add("sf-video-visible");
+    if (btn) btn.classList.add("sf-ctrl-btn--active");
+    wrap.querySelector(".sf-ico-video-on")?.classList.add("hidden");
+    wrap.querySelector(".sf-ico-video-off")?.classList.remove("hidden");
+  } else {
+    wrap.classList.remove("sf-video-visible", "sf-video-large");
+    if (btn) btn.classList.remove("sf-ctrl-btn--active");
+  }
+  // Update button icons in player bar
+  const btnEl = sfEl("sfVideoBtn");
+  if (btnEl) {
+    btnEl.querySelector(".sf-ico-video-on")?.classList.toggle("hidden", sfVideoVisible);
+    btnEl.querySelector(".sf-ico-video-off")?.classList.toggle("hidden", !sfVideoVisible);
+  }
+  sfToast(sfVideoVisible ? "Video on" : "Video off", "info");
+}
+
+function sfToggleVideoSize() {
+  const wrap = sfEl("ytWrap");
+  if (!wrap || !sfVideoVisible) return;
+  wrap.classList.toggle("sf-video-large");
 }
 
 // ═══════════════════════════════════

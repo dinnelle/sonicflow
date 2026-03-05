@@ -70,9 +70,15 @@ $userPlaylists = $plStmt->fetchAll();
         <div class="absolute bottom-[-10%] right-[-5%] w-[40%] h-[40%] bg-accent-400/[0.03] rounded-full blur-[80px] animate-drift-alt"></div>
     </div>
 
-    <!-- Hidden YT Player -->
+    <!-- YT Player (hidden by default, toggleable) -->
     <div id="ytWrap">
         <div id="ytp"></div>
+        <button class="sf-video-close" onclick="sfToggleVideo()" title="Close video">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+        <button class="sf-video-resize" onclick="sfToggleVideoSize()" title="Toggle size">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 3.75v4.5m0-4.5h4.5m-4.5 0L9 9M3.75 20.25v-4.5m0 4.5h4.5m-4.5 0L9 15M20.25 3.75h-4.5m4.5 0v4.5m0-4.5L15 9m5.25 11.25h-4.5m4.5 0v-4.5m0 4.5L15 15"/></svg>
+        </button>
     </div>
 
     <div class="h-screen flex flex-col relative z-10">
@@ -441,6 +447,16 @@ $userPlaylists = $plStmt->fetchAll();
                 <div class="flex items-center gap-2 flex-1 justify-end">
                     <span id="sfTime" class="text-[10px] text-white/20 font-mono hidden sm:block tabular-nums">0:00 / 0:00</span>
 
+                    <!-- Video Toggle -->
+                    <button id="sfVideoBtn" onclick="sfToggleVideo()" class="sf-ctrl-btn hidden sm:flex sf-player-extras" title="Video (V)">
+                        <svg class="w-3.5 h-3.5 sf-ico-video-on" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M4.5 18.75h9a2.25 2.25 0 0 0 2.25-2.25v-9a2.25 2.25 0 0 0-2.25-2.25h-9A2.25 2.25 0 0 0 2.25 7.5v9a2.25 2.25 0 0 0 2.25 2.25Z" />
+                        </svg>
+                        <svg class="w-3.5 h-3.5 sf-ico-video-off hidden" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="m15.75 10.5 4.72-4.72a.75.75 0 0 1 1.28.53v11.38a.75.75 0 0 1-1.28.53l-4.72-4.72M12 18.75H4.5a2.25 2.25 0 0 1-2.25-2.25V9m12.841 9.091L16.5 19.5m-1.409-1.409c.546-.546.878-1.3.878-2.132v-5.71m-6.97 8.5L2.25 12.75m6.954-4.733A2.25 2.25 0 0 1 12 5.25h1.5a2.25 2.25 0 0 1 2.25 2.25v1.5M2.25 21l19.5-19.5" />
+                        </svg>
+                    </button>
+
                     <!-- Lyrics Toggle -->
                     <button id="sfLyricsBtn" onclick="sfToggleLyrics()" class="sf-ctrl-btn hidden sm:flex sf-player-extras" title="Lyrics (L)">
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
@@ -609,6 +625,7 @@ $userPlaylists = $plStmt->fetchAll();
                 <span class="sf-key">R</span><span class="sf-key-label">Toggle repeat</span>
                 <span class="sf-key">L</span><span class="sf-key-label">Toggle lyrics</span>
                 <span class="sf-key">M</span><span class="sf-key-label">Mute / Unmute</span>
+                <span class="sf-key">V</span><span class="sf-key-label">Toggle video</span>
                 <span class="sf-key">Ctrl+K</span><span class="sf-key-label">Focus search</span>
                 <span class="sf-key">Esc</span><span class="sf-key-label">Close modals</span>
             </div>

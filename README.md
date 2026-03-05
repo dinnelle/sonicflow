@@ -1,6 +1,6 @@
-# SonicFlow v2.2 — Personal YouTube Music Player
+# SonicFlow v2.3 — Personal YouTube Music Player
 
-A self-hosted YouTube music player built with PHP, MySQL, and the YouTube IFrame API. Search, queue, playlist management, lyrics, and more — all from your own server.
+A self-hosted YouTube music player built with PHP, MySQL, and the YouTube IFrame API. Search, queue, playlist management, lyrics, video toggle, and more — all from your own server.
 
 ## Features
 
@@ -12,6 +12,7 @@ A self-hosted YouTube music player built with PHP, MySQL, and the YouTube IFrame
 - **Draggable progress bar** — click or drag to seek anywhere in the track
 - **Volume slider** with keyboard control (↑/↓ arrows)
 - **Media Session API** — lock screen / OS notification controls (play, pause, next, prev, seek) with track artwork
+- **Video toggle** — switch between audio-only and picture-in-picture video mode (`V` key), resizable overlay
 
 ### Search
 - **Multi-source search** — tries Invidious → Piped → YouTube Data API (automatic fallback)
@@ -20,6 +21,7 @@ A self-hosted YouTube music player built with PHP, MySQL, and the YouTube IFrame
 - **Infinite scroll** — loads more results automatically
 - **Quick focus** — `Ctrl+K` / `Cmd+K` to focus search from anywhere
 - **Clear button** — X icon appears when search field has text
+- **Icon-only action buttons** — clean play, queue, play-next, and playlist buttons on result cards
 
 ### Queue
 - **Drag & drop reorder** — grab the handle to rearrange
@@ -47,6 +49,7 @@ A self-hosted YouTube music player built with PHP, MySQL, and the YouTube IFrame
 - **Mobile bottom sheet** — queue/playlists slide up on mobile
 - **Image fallbacks** — broken thumbnails gracefully fade instead of showing broken icons
 - **PWA support** — installable as app on phone/desktop
+- **Custom SVG favicon** — rose-pink music note with sound wave arcs
 
 ### Dashboard
 - **Recent searches** — clickable chips for quick re-search
@@ -68,6 +71,7 @@ A self-hosted YouTube music player built with PHP, MySQL, and the YouTube IFrame
 | S         | Toggle shuffle      |
 | R         | Toggle repeat       |
 | L         | Toggle lyrics       |
+| V         | Toggle video        |
 | M         | Mute / Unmute       |
 | Ctrl+K    | Focus search        |
 | ?         | Show shortcuts      |
@@ -101,7 +105,7 @@ define('DB_HOST', 'localhost');
 define('DB_NAME', 'sonic');
 define('DB_USER', 'root');
 define('DB_PASS', '');
-define('BASE_PATH', '/projects/sonicflow');
+// BASE_PATH auto-detects: subfolder on localhost, empty on production domain
 ```
 
 ### 3. File Structure
@@ -118,8 +122,9 @@ sonicflow/
 ├── includes/
 │   └── auth.php           # Auth, CSRF, rate limiting
 ├── static/
-│   ├── css/style.css      # All styles (dark + light themes)
-│   ├── js/player.js       # Player logic (~2300 lines)
+│   ├── css/style.css      # All styles (dark + light themes, video PiP)
+│   ├── js/player.js       # Player logic (~2400 lines)
+│   ├── favicon.svg        # SVG favicon
 │   ├── icon-192.png       # PWA icon
 │   └── icon-512.png       # PWA icon
 ├── .htaccess              # Security headers & rewrites
@@ -127,7 +132,7 @@ sonicflow/
 ├── login.php              # Login page
 ├── register.php           # Registration page
 ├── logout.php             # Session logout
-├── player.php             # Main player UI
+├── player.php             # Main player UI (video toggle, search clear)
 ├── manifest.json          # PWA manifest
 ├── sw.js                  # Service worker
 └── sonic.sql              # Database schema
@@ -165,6 +170,8 @@ UPDATE sf_users SET role = 'admin' WHERE username = 'yourname';
 ## Notes
 
 - **Equalizer** — not possible; YouTube's iframe API doesn't expose the audio stream
+- **Video mode** — toggles the YouTube iframe between hidden (audio-only) and a draggable PiP overlay; resizable with the expand button
 - **Lyrics** — fetched from lrclib.net (free, no API key). Not all songs available
-- **Shared playlists** — base64-encoded in URL, no backend changes needed. Recipients must be logged in
+- **Shared playlists** — base64-encoded in URL using TextEncoder/TextDecoder (no deprecated escape/unescape). Recipients must be logged in
 - **PWA icons** — replace `static/icon-192.png` and `static/icon-512.png` with your own branding
+- **Favicon** — custom SVG at `static/favicon.svg`; replace with your own if rebranding
