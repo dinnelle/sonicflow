@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a0a10"/>
+      <stop offset="100%" stop-color="#0a0507"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fb7185"/>
+      <stop offset="100%" stop-color="#f43f5e"/>
+    </linearGradient>
+    <linearGradient id="glow" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fb7185" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#f43f5e" stop-opacity="0"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <circle cx="256" cy="280" r="180" fill="url(#glow)"/>
+  <!-- Music note -->
+  <path d="M296 112v180c-16-18-40-30-68-30-44 0-80 28-80 64s36 64 80 64 80-28 80-64V176h56v-64h-68z" fill="url(#accent)"/>
+  <!-- Sound wave arcs -->
+  <path d="M340 240c20 16 32 40 32 68s-12 52-32 68" fill="none" stroke="#fb7185" stroke-width="14" stroke-linecap="round" opacity="0.5"/>
+  <path d="M368 216c32 24 52 64 52 108s-20 84-52 108" fill="none" stroke="#fb7185" stroke-width="14" stroke-linecap="round" opacity="0.3"/>
+</svg>

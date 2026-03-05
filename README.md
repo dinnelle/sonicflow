@@ -1,112 +1,170 @@
-# SonicFlow v2.0 — Upgrade Instructions
+# SonicFlow v2.2 — Personal YouTube Music Player
 
-## What's New (All Features Added)
+A self-hosted YouTube music player built with PHP, MySQL, and the YouTube IFrame API. Search, queue, playlist management, lyrics, and more — all from your own server.
+
+## Features
 
 ### Player Controls
-- **Shuffle mode** — randomizes next track (button + press `S`)
-- **Repeat modes** — off / repeat all / repeat one (button + press `R`)
+- **Play / Pause / Next / Previous** with on-screen buttons or keyboard
+- **Shuffle mode** — randomizes next track (`S` key)
+- **Repeat modes** — off / repeat all / repeat one (`R` key)
 - **Sleep timer** — auto-stop after 5/15/30/45/60/90 minutes
-- **Seek ±10s** — arrow keys skip forward/back within a track
-- **Volume keys** — up/down arrows adjust volume
+- **Draggable progress bar** — click or drag to seek anywhere in the track
+- **Volume slider** with keyboard control (↑/↓ arrows)
+- **Media Session API** — lock screen / OS notification controls (play, pause, next, prev, seek) with track artwork
+
+### Search
+- **Multi-source search** — tries Invidious → Piped → YouTube Data API (automatic fallback)
+- **Debounced live suggestions** — history-based dropdown as you type
+- **Search history** — stored locally, shown as dashboard chips
+- **Infinite scroll** — loads more results automatically
+- **Quick focus** — `Ctrl+K` / `Cmd+K` to focus search from anywhere
+- **Clear button** — X icon appears when search field has text
+
+### Queue
+- **Drag & drop reorder** — grab the handle to rearrange
+- **Play Next** — insert a track right after the current one
+- **Auto-scroll** — queue scrolls to the active track
+- **Duplicate prevention** — won't add the same track twice
+- **Persistence** — queue, volume, shuffle, and repeat mode survive page refresh (localStorage)
+
+### Playlists
+- **Create / delete** playlists with track limits
+- **Cover art** — auto-generated grid from first 4 track thumbnails
+- **Export** — download as JSON file
+- **Import** — upload a JSON file to recreate a playlist
+- **Share** — copies a URL with playlist data encoded (no backend needed)
 
 ### Lyrics
 - **Lyrics panel** — slides in from the right, auto-fetches from lrclib.net
-- Toggle with button in player bar or now-playing hero, or press `L`
-
-### Search Improvements
-- **Debounced live search** — suggestions appear as you type (300ms delay)
-- **Search history** — stored locally, shown in dropdown + dashboard chips
-- **Infinite scroll** — automatically loads more results as you scroll down
-- **"Back to dashboard"** link in search results header
-- **"Add All to Queue"** button below search results
-
-### Queue Improvements
-- **Drag & drop reorder** — grab the dot handle to rearrange queue order
-- **Duplicate prevention** — won't add the same track twice
-
-### Playlist Improvements
-- **Cover art thumbnails** — auto-generated grid from first 4 track thumbnails
-- **Export playlist** — downloads as JSON file
-- **Import playlist** — upload a JSON file to recreate a playlist
-- **Share playlist** — copies a URL with playlist data encoded (no backend needed)
+- Toggle with button or `L` key
+- Cleans "(Official Video)" and similar suffixes for better search accuracy
 
 ### UI/UX
-- **Toast notifications** — elegant slide-in toasts replace all `alert()` / `confirm()` calls
+- **Dark / Light theme** — toggle with button in header, saved to localStorage
 - **Dynamic color theming** — ambient background glow shifts hue per track
-- **Dark / Light theme toggle** — sun/moon button in header, preference saved to localStorage
-- **Mobile bottom sheet** — queue/playlists slide up from bottom on mobile (< 1024px)
-- **Keyboard shortcuts modal** — press `?` to see all shortcuts
+- **Toast notifications** — elegant slide-in toasts (no native `alert()` / `confirm()`)
+- **Mobile bottom sheet** — queue/playlists slide up on mobile
+- **Image fallbacks** — broken thumbnails gracefully fade instead of showing broken icons
 - **PWA support** — installable as app on phone/desktop
 
-### All Keyboard Shortcuts
-| Key | Action |
-|-----|--------|
-| Space | Play / Pause |
-| Shift+→ | Next track |
-| Shift+← | Previous track |
-| → | Seek +10s |
-| ← | Seek -10s |
-| ↑ | Volume up |
-| ↓ | Volume down |
-| S | Toggle shuffle |
-| R | Toggle repeat |
-| L | Toggle lyrics |
-| M | Mute / Unmute |
-| T | Toggle dark / light |
-| ? | Show shortcuts |
-| Esc | Close modals |
+### Dashboard
+- **Recent searches** — clickable chips for quick re-search
+- **Recently played** — cards from your play history
+- **For You** — personalized recommendations based on search history
+- **More From Your Artists** — discover new tracks from artists you listen to
+
+### Keyboard Shortcuts
+
+| Key       | Action              |
+| --------- | ------------------- |
+| Space     | Play / Pause        |
+| Shift+→   | Next track          |
+| Shift+←   | Previous track      |
+| →         | Seek +10s           |
+| ←         | Seek -10s           |
+| ↑         | Volume up           |
+| ↓         | Volume down         |
+| S         | Toggle shuffle      |
+| R         | Toggle repeat       |
+| L         | Toggle lyrics       |
+| M         | Mute / Unmute       |
+| Ctrl+K    | Focus search        |
+| ?         | Show shortcuts      |
+| Esc       | Close modals        |
 
 ---
 
-## Installation (Replace Files)
+## Requirements
 
-### Files to REPLACE (overwrite your existing ones):
-```
-player.php              → your root/player.php
-static/js/player.js     → your root/static/js/player.js
-static/css/style.css    → your root/static/css/style.css
+- PHP 7.4+ with PDO MySQL
+- MySQL 5.7+ / MariaDB 10.3+
+- Apache with `mod_rewrite` (XAMPP works great)
+- A YouTube Data API v3 key (optional — search works without it via Invidious/Piped)
+
+## Installation
+
+### 1. Database Setup
+
+Create a MySQL database called `sonic` and import the schema:
+
+```bash
+mysql -u root -p sonic < sonic.sql
 ```
 
-### Files to ADD (new files):
-```
-manifest.json           → your root/manifest.json
-sw.js                   → your root/sw.js
-static/icon-192.png     → your root/static/icon-192.png
-static/icon-512.png     → your root/static/icon-512.png
+### 2. Configure Database
+
+Edit `config/database.php` with your credentials:
+
+```php
+define('DB_HOST', 'localhost');
+define('DB_NAME', 'sonic');
+define('DB_USER', 'root');
+define('DB_PASS', '');
+define('BASE_PATH', '/projects/sonicflow');
 ```
 
-### Files NOT changed (keep as-is):
+### 3. File Structure
+
 ```
-index.php
-login.php
-register.php
-logout.php
-settings.php
-includes/auth.php
-config/database.php
-api/playlists.php
-api/tracks.php
-api/history.php
-api/save-key.php
-api/settings.php
-setup.sql
-.htaccess
+sonicflow/
+├── api/
+│   ├── history.php        # Play history CRUD
+│   ├── playlists.php      # Playlist CRUD
+│   ├── settings.php       # API key management
+│   └── tracks.php         # Track CRUD
+├── config/
+│   └── database.php       # DB connection & constants
+├── includes/
+│   └── auth.php           # Auth, CSRF, rate limiting
+├── static/
+│   ├── css/style.css      # All styles (dark + light themes)
+│   ├── js/player.js       # Player logic (~2300 lines)
+│   ├── icon-192.png       # PWA icon
+│   └── icon-512.png       # PWA icon
+├── .htaccess              # Security headers & rewrites
+├── index.php              # Redirect to login/player
+├── login.php              # Login page
+├── register.php           # Registration page
+├── logout.php             # Session logout
+├── player.php             # Main player UI
+├── manifest.json          # PWA manifest
+├── sw.js                  # Service worker
+└── sonic.sql              # Database schema
+```
+
+### 4. API Key (Optional)
+
+Search works out of the box via free Invidious/Piped instances. For reliable fallback, add a YouTube Data API v3 key:
+
+1. Get a key from [Google Cloud Console](https://console.cloud.google.com/apis/library/youtube.googleapis.com)
+2. Log in as admin
+3. Click the key icon in the header
+4. Paste and save
+
+### 5. Admin Access
+
+Promote a user to admin via MySQL:
+
+```sql
+UPDATE sf_users SET role = 'admin' WHERE username = 'yourname';
 ```
 
 ---
+
+## Security
+
+- CSRF token protection on all state-changing API requests
+- Bcrypt password hashing
+- Rate limiting on login (5 attempts per 15 minutes)
+- Prepared statements (PDO) — no SQL injection
+- XSS protection via output escaping (`htmlspecialchars`, `sfEsc`, `sfAttr`)
+- Security headers: `X-Content-Type-Options`, `X-Frame-Options`, `X-XSS-Protection`, `Referrer-Policy`
+- Config/includes directories blocked via `.htaccess`
 
 ## Notes
 
-### What's NOT included (and why):
-- **Equalizer** — YouTube's iframe API doesn't expose the audio stream to Web Audio API. This is a YouTube limitation, not possible without downloading audio.
-- **Multi-user playlist collaboration** — Requires significant backend work (invite system, permissions, real-time sync). GoDaddy shared hosting doesn't support WebSockets. Planned for future.
-- **Smooth page transitions** — Login/register/player are separate PHP pages. Would need a full SPA rewrite.
-
-### PWA Icons:
-The included icons are simple generated PNGs. For a polished look, replace `static/icon-192.png` and `static/icon-512.png` with your own branded icons.
-
-### Lyrics:
-Lyrics are fetched from **lrclib.net** (free, no API key needed). Not all songs have lyrics available. The system cleans common suffixes like "(Official Video)" from titles before searching.
-
-### Share Playlist:
-Uses base64-encoded data in the URL (no backend changes needed). Shared links work as long as the recipient has an account and is logged in. The playlist data is loaded into their queue.
+- **Equalizer** — not possible; YouTube's iframe API doesn't expose the audio stream
+- **Lyrics** — fetched from lrclib.net (free, no API key). Not all songs available
+- **Shared playlists** — base64-encoded in URL, no backend changes needed. Recipients must be logged in
+- **PWA icons** — replace `static/icon-192.png` and `static/icon-512.png` with your own branding

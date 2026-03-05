@@ -21,7 +21,7 @@ if ($method === 'GET') {
 
 if ($method === 'POST') {
     requireCSRF();
-    $data = json_decode(file_get_contents('php://input'), true);
+    $data = json_decode(file_get_contents('php://input'), true) ?? [];
     $name = clean($data['name'] ?? '', 50);
     if (!$name) jsonResponse(['error' => 'Name required'], 400);
 

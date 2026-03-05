@@ -22,7 +22,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         if ($stmt->fetch()) setFlash('error', 'Username already taken.');
         else {
             $hash = password_hash($password, PASSWORD_BCRYPT, ['cost' => 12]);
-            $db->prepare("INSERT INTO sf_users (username, password_hash) VALUES (?, ?)")->execute([$username, $hash]);
+            $db->prepare("INSERT INTO sf_users (username, email, password_hash) VALUES (?, '', ?)")->execute([$username, $hash]);
             setFlash('success', 'Account created! Please log in.');
             header('Location: ' . BASE_PATH . '/login.php');
             exit;
@@ -35,6 +35,7 @@ $B = BASE_PATH;
 ?>
 <!DOCTYPE html>
 <html lang="en" class="dark">
+<script>try{if(localStorage.getItem('sf_theme')==='light'){document.documentElement.className='light'}}catch(e){}</script>
 
 <head>
     <meta charset="UTF-8">
@@ -63,6 +64,9 @@ $B = BASE_PATH;
             }
         }
     </script>
+    <link rel="icon" type="image/svg+xml" href="<?= $B ?>/static/favicon.svg">
+    <link rel="icon" type="image/png" sizes="192x192" href="<?= $B ?>/static/icon-192.png">
+    <link rel="apple-touch-icon" href="<?= $B ?>/static/icon-192.png">
     <link rel="stylesheet" href="<?= $B ?>/static/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
 </head>

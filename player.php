@@ -16,6 +16,7 @@ $userPlaylists = $plStmt->fetchAll();
 ?>
 <!DOCTYPE html>
 <html lang="en" class="dark">
+<script>try{if(localStorage.getItem('sf_theme')==='light'){document.documentElement.className='light'}}catch(e){}</script>
 
 <head>
     <meta charset="UTF-8">
@@ -23,8 +24,10 @@ $userPlaylists = $plStmt->fetchAll();
     <title>SonicFlow — Player</title>
     <meta name="description" content="SonicFlow — Your personal YouTube music player">
     <meta name="theme-color" content="#0a0507">
-    <link rel="manifest" href="<?= $B ?>/manifest.json">
+    <link rel="icon" type="image/svg+xml" href="<?= $B ?>/static/favicon.svg">
+    <link rel="icon" type="image/png" sizes="192x192" href="<?= $B ?>/static/icon-192.png">
     <link rel="apple-touch-icon" href="<?= $B ?>/static/icon-192.png">
+    <link rel="manifest" href="<?= $B ?>/manifest.json">
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -92,6 +95,15 @@ $userPlaylists = $plStmt->fetchAll();
                         </svg>
                     </button>
                 <?php endif; ?>
+                <!-- Theme Toggle Button -->
+                <button onclick="sfToggleTheme()" class="sf-theme-toggle" title="Toggle light/dark theme">
+                    <svg class="w-4 h-4 sf-ico-sun" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                    </svg>
+                    <svg class="w-4 h-4 sf-ico-moon" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                    </svg>
+                </button>
                 <!-- Keyboard Shortcuts Button -->
                 <button onclick="sfShowShortcuts()" class="sf-header-btn" title="Keyboard shortcuts (?)">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -122,7 +134,10 @@ $userPlaylists = $plStmt->fetchAll();
                 <!-- Search Bar + View Toggle -->
                 <div class="flex gap-2 mb-4">
                     <div id="sfSearchWrap" class="relative flex-1">
-                        <input id="sfSearchIn" placeholder="Search for music..." class="sf-input w-full" autocomplete="off">
+                        <input id="sfSearchIn" placeholder="Search for music... (Ctrl+K)" class="sf-input w-full pr-8" autocomplete="off">
+                        <button id="sfSearchClear" onclick="sfEl('sfSearchIn').value='';sfEl('sfSearchClear').classList.add('hidden');sfEl('sfSearchIn').focus()" class="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-md text-white/20 hover:text-white/50 transition-colors hidden" title="Clear search">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </button>
                         <!-- Search Suggestions Dropdown -->
                         <div id="sfSuggestDrop" class="sf-suggest-dropdown hidden"></div>
                     </div>
@@ -446,7 +461,7 @@ $userPlaylists = $plStmt->fetchAll();
                         <svg class="w-3.5 h-3.5 text-white/25" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02z" />
                         </svg>
-                        <input type="range" id="sfVol" min="0" max="100" value="80" class="vol-slider w-20" oninput="sfPlayer&&sfPlayer.setVolume(+this.value)">
+                        <input type="range" id="sfVol" min="0" max="100" value="80" class="vol-slider w-20" oninput="sfPlayer&&sfPlayer.setVolume(+this.value);sfSaveState()">
                     </div>
 
                     <!-- Mobile: Queue Toggle -->
@@ -594,6 +609,7 @@ $userPlaylists = $plStmt->fetchAll();
                 <span class="sf-key">R</span><span class="sf-key-label">Toggle repeat</span>
                 <span class="sf-key">L</span><span class="sf-key-label">Toggle lyrics</span>
                 <span class="sf-key">M</span><span class="sf-key-label">Mute / Unmute</span>
+                <span class="sf-key">Ctrl+K</span><span class="sf-key-label">Focus search</span>
                 <span class="sf-key">Esc</span><span class="sf-key-label">Close modals</span>
             </div>
         </div>

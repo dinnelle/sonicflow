@@ -38,6 +38,7 @@ $B = BASE_PATH;
 ?>
 <!DOCTYPE html>
 <html lang="en" class="dark">
+<script>try{if(localStorage.getItem('sf_theme')==='light'){document.documentElement.className='light'}}catch(e){}</script>
 
 <head>
     <meta charset="UTF-8">
@@ -66,6 +67,9 @@ $B = BASE_PATH;
             }
         }
     </script>
+    <link rel="icon" type="image/svg+xml" href="<?= $B ?>/static/favicon.svg">
+    <link rel="icon" type="image/png" sizes="192x192" href="<?= $B ?>/static/icon-192.png">
+    <link rel="apple-touch-icon" href="<?= $B ?>/static/icon-192.png">
     <link rel="stylesheet" href="<?= $B ?>/static/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&display=swap" rel="stylesheet">
 </head>

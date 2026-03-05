@@ -912,6 +912,22 @@
   pointer-events: none;
 }
 
+/* Dragging state — disable transitions for smooth drag */
+body.sf-dragging .sf-progress-fill {
+  transition: none;
+}
+body.sf-dragging .sf-progress-thumb {
+  opacity: 1;
+  transition: none;
+}
+body.sf-dragging .sf-progress-wrap .sf-progress-track {
+  height: 4px;
+}
+body.sf-dragging {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 /* ─── Disc / Vinyl ─── */
 .sf-disc {
   width: 42px;
@@ -1928,12 +1944,12 @@
   animation: drift 13s ease-in-out infinite alternate-reverse;
 }
 
-/* ─── Spinner ─── */
+/* ─── Search Spinner (Spinning Animation) ─── */
 .sf-spinner {
-  width: 28px;
-  height: 28px;
-  border: 2px solid rgba(255, 255, 255, 0.06);
-  border-top-color: rgba(251, 113, 133, 0.4);
+  width: 32px;
+  height: 32px;
+  border: 3px solid rgba(255, 255, 255, 0.06);
+  border-top-color: #fb7185;
   border-radius: 50%;
   animation: sf-spin 0.7s linear infinite;
 }
@@ -2045,4 +2061,682 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
   }
+  /* Exempt functional spinners — these must always animate */
+  .sf-spinner {
+    animation: sf-spin 0.7s linear infinite !important;
+  }
 }
+
+/* ══════════════════════════════════════ */
+/*        THEME TOGGLE BUTTON            */
+/* ══════════════════════════════════════ */
+
+.sf-theme-toggle {
+  padding: 0.5rem;
+  border-radius: 0.5rem;
+  color: rgba(255, 255, 255, 0.3);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.sf-theme-toggle:hover {
+  color: rgba(255, 255, 255, 0.7);
+  background: rgba(255, 255, 255, 0.05);
+}
+.sf-theme-toggle .sf-ico-sun,
+.sf-theme-toggle .sf-ico-moon { display: none; }
+html.dark .sf-theme-toggle .sf-ico-sun { display: block; }
+html.dark .sf-theme-toggle .sf-ico-moon { display: none; }
+html.light .sf-theme-toggle .sf-ico-sun { display: none; }
+html.light .sf-theme-toggle .sf-ico-moon { display: block; }
+
+/* ══════════════════════════════════════ */
+/*        LIGHT THEME                    */
+/* ══════════════════════════════════════ */
+
+/* ─── Tailwind overrides for light mode ─── */
+html.light body.bg-surface-950 { background: #f5f3f4 !important; }
+html.light body.bg-surface-900 { background: #eee9eb !important; }
+html.light .text-white { color: #1a1a2e !important; }
+html.light body.text-white { color: #1a1a2e !important; }
+
+/* ─── Scrollbar ─── */
+html.light .sf-scroll::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.08);
+}
+html.light .sf-scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.15);
+}
+
+/* ─── Auth pages ─── */
+html.light .sf-orb--1 {
+  background: radial-gradient(circle, rgba(244, 63, 94, 0.08), transparent 70%);
+}
+html.light .sf-orb--2 {
+  background: radial-gradient(circle, rgba(251, 113, 133, 0.06), transparent 70%);
+}
+html.light .sf-orb--3 {
+  background: radial-gradient(circle, rgba(225, 29, 72, 0.04), transparent 70%);
+}
+html.light .sf-noise { opacity: 0.008; }
+
+html.light .sf-glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.03) inset,
+    0 20px 60px rgba(0, 0, 0, 0.08),
+    0 0 80px rgba(244, 63, 94, 0.02);
+}
+html.light .sf-logo-inner {
+  background: #fff;
+}
+html.light .sf-logo-inner svg { color: #e11d48 !important; }
+
+/* ─── Form fields ─── */
+html.light .sf-label {
+  color: rgba(0, 0, 0, 0.4);
+}
+html.light .sf-input {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: #1a1a2e;
+}
+html.light .sf-input::placeholder {
+  color: rgba(0, 0, 0, 0.25);
+}
+html.light .sf-input:hover {
+  border-color: rgba(0, 0, 0, 0.15);
+  background: rgba(0, 0, 0, 0.04);
+}
+html.light .sf-input:focus {
+  border-color: rgba(244, 63, 94, 0.4);
+  background: #fff;
+  box-shadow:
+    0 0 0 3px rgba(244, 63, 94, 0.08),
+    0 0 20px rgba(244, 63, 94, 0.03);
+}
+html.light .sf-input-icon {
+  color: rgba(0, 0, 0, 0.2);
+}
+html.light .sf-input-wrap:focus-within .sf-input-icon {
+  color: rgba(244, 63, 94, 0.6);
+}
+
+/* ─── Flash messages (light) ─── */
+html.light .sf-flash--error {
+  background: rgba(239, 68, 68, 0.06);
+  border-color: rgba(239, 68, 68, 0.15);
+  color: #dc2626;
+}
+html.light .sf-flash--success {
+  background: rgba(16, 185, 129, 0.06);
+  border-color: rgba(16, 185, 129, 0.15);
+  color: #059669;
+}
+
+/* ─── Divider ─── */
+html.light .sf-divider {
+  background: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.08), transparent);
+}
+
+/* ─── Password strength ─── */
+html.light .sf-strength-seg {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* ─── Auth page text overrides ─── */
+html.light .text-white\/30,
+html.light [class*="text-white/30"] { color: rgba(0, 0, 0, 0.4) !important; }
+html.light .text-white\/25,
+html.light [class*="text-white/25"] { color: rgba(0, 0, 0, 0.35) !important; }
+html.light .text-white\/20,
+html.light [class*="text-white/20"] { color: rgba(0, 0, 0, 0.3) !important; }
+html.light .text-white\/15,
+html.light [class*="text-white/15"] { color: rgba(0, 0, 0, 0.2) !important; }
+html.light .text-white\/10,
+html.light [class*="text-white/10"] { color: rgba(0, 0, 0, 0.15) !important; }
+html.light .text-white\/40,
+html.light [class*="text-white/40"] { color: rgba(0, 0, 0, 0.45) !important; }
+html.light .text-white\/60,
+html.light [class*="text-white/60"] { color: rgba(0, 0, 0, 0.6) !important; }
+html.light .text-white\/70,
+html.light [class*="text-white/70"] { color: rgba(0, 0, 0, 0.65) !important; }
+html.light .text-white\/80,
+html.light [class*="text-white/80"] { color: rgba(0, 0, 0, 0.75) !important; }
+html.light .text-white\/90,
+html.light [class*="text-white/90"] { color: rgba(0, 0, 0, 0.85) !important; }
+
+/* ─── Player header ─── */
+html.light .sf-header {
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.85);
+  color: #1a1a2e;
+}
+html.light .sf-header-btn {
+  color: rgba(0, 0, 0, 0.35);
+}
+html.light .sf-header-btn:hover {
+  color: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.05);
+}
+html.light .sf-header-btn--admin { color: rgba(180, 130, 0, 0.6); }
+html.light .sf-header-btn--admin:hover {
+  color: #b48200;
+  background: rgba(251, 191, 36, 0.1);
+}
+html.light .sf-header-user {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.06);
+}
+html.light .sf-header-logo {
+  box-shadow: 0 2px 12px rgba(244, 63, 94, 0.15);
+}
+html.light .sf-theme-toggle {
+  color: rgba(0, 0, 0, 0.35);
+}
+html.light .sf-theme-toggle:hover {
+  color: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* ─── Sidebar ─── */
+html.light .sf-sidebar {
+  background: rgba(0, 0, 0, 0.01);
+}
+html.light .sf-sidebar-tab {
+  color: rgba(0, 0, 0, 0.3);
+}
+html.light .sf-sidebar-tab:hover {
+  color: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+/* ─── Clear / Import buttons ─── */
+html.light .sf-clear-btn {
+  color: rgba(0, 0, 0, 0.25);
+}
+html.light .sf-clear-btn:hover {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.06);
+}
+html.light .sf-import-btn {
+  color: rgba(0, 0, 0, 0.25);
+}
+html.light .sf-import-btn:hover {
+  color: #e11d48;
+  background: rgba(244, 63, 94, 0.06);
+}
+
+/* ─── Empty states ─── */
+html.light .sf-empty-icon {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.06);
+  color: rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Queue ─── */
+html.light .sf-queue-item:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+html.light .sf-queue-item--active {
+  background: rgba(244, 63, 94, 0.05) !important;
+  border-color: rgba(244, 63, 94, 0.12);
+}
+html.light .sf-queue-item--dragging {
+  background: rgba(244, 63, 94, 0.05);
+}
+html.light .sf-queue-drag {
+  color: rgba(0, 0, 0, 0.12);
+}
+html.light .sf-queue-item:hover .sf-queue-drag {
+  color: rgba(0, 0, 0, 0.3);
+}
+html.light .sf-queue-num {
+  color: rgba(0, 0, 0, 0.25);
+}
+html.light .sf-queue-thumb {
+  border-color: rgba(0, 0, 0, 0.08);
+}
+html.light .sf-queue-title {
+  color: rgba(0, 0, 0, 0.6);
+}
+html.light .sf-queue-artist {
+  color: rgba(0, 0, 0, 0.3);
+}
+html.light .sf-queue-remove {
+  color: rgba(0, 0, 0, 0.2);
+}
+html.light .sf-queue-remove:hover {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.08);
+}
+
+/* ─── Playlist create button ─── */
+html.light .sf-pl-create-btn {
+  background: rgba(244, 63, 94, 0.08);
+  border-color: rgba(244, 63, 94, 0.12);
+}
+html.light .sf-pl-create-btn:hover {
+  background: rgba(244, 63, 94, 0.15);
+  border-color: rgba(244, 63, 94, 0.2);
+}
+
+/* ─── Accordion ─── */
+html.light .sf-accordion {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+html.light .sf-accordion:hover {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+html.light .sf-accordion.sf-accordion--open {
+  border-color: rgba(244, 63, 94, 0.15);
+  box-shadow: 0 0 20px rgba(244, 63, 94, 0.03);
+}
+html.light .sf-accordion-header {
+  background: rgba(0, 0, 0, 0.015);
+}
+html.light .sf-accordion-header:hover {
+  background: rgba(0, 0, 0, 0.035);
+}
+html.light .sf-accordion-name {
+  color: rgba(0, 0, 0, 0.7);
+}
+html.light .sf-accordion-count {
+  color: rgba(0, 0, 0, 0.3);
+}
+html.light .sf-accordion-action {
+  color: rgba(0, 0, 0, 0.3);
+}
+html.light .sf-accordion-action:hover {
+  color: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.04);
+}
+html.light .sf-accordion-action--danger:hover {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.06);
+}
+html.light .sf-accordion-chevron {
+  color: rgba(0, 0, 0, 0.2);
+}
+html.light .sf-accordion--open .sf-accordion-chevron {
+  color: rgba(244, 63, 94, 0.5);
+}
+html.light .sf-accordion-content {
+  border-top-color: rgba(0, 0, 0, 0.04);
+}
+html.light .sf-accordion-track:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+html.light .sf-accordion-track-num {
+  color: rgba(0, 0, 0, 0.2);
+}
+html.light .sf-accordion-track-title {
+  color: rgba(0, 0, 0, 0.55);
+}
+html.light .sf-accordion-track:hover .sf-accordion-track-title {
+  color: rgba(0, 0, 0, 0.8);
+}
+html.light .sf-accordion-track-remove:hover {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.08);
+}
+html.light .sf-accordion-empty {
+  color: rgba(0, 0, 0, 0.15);
+}
+
+/* ─── Playlist cover art ─── */
+html.light .sf-pl-cover {
+  background: rgba(0, 0, 0, 0.03);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+html.light .sf-pl-cover--empty {
+  color: rgba(0, 0, 0, 0.12);
+}
+
+/* ─── Player bar ─── */
+html.light .sf-player-bar {
+  border-top-color: rgba(0, 0, 0, 0.06);
+  background: rgba(255, 255, 255, 0.9);
+}
+
+/* ─── Progress bar ─── */
+html.light .sf-progress-track {
+  background: rgba(0, 0, 0, 0.06);
+}
+
+/* ─── Disc / Vinyl ─── */
+html.light .sf-disc {
+  background: linear-gradient(135deg, #e8e0e2, #d4ccd0);
+  border-color: rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+html.light .sf-disc-hole {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Control buttons ─── */
+html.light .sf-ctrl-btn {
+  color: rgba(0, 0, 0, 0.35);
+}
+html.light .sf-ctrl-btn:hover {
+  color: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.05);
+}
+html.light .sf-play-btn {
+  background: rgba(244, 63, 94, 0.1);
+  border-color: rgba(244, 63, 94, 0.2);
+}
+html.light .sf-play-btn:hover {
+  background: rgba(244, 63, 94, 0.18);
+  border-color: rgba(244, 63, 94, 0.3);
+}
+
+/* ─── Volume slider ─── */
+html.light .vol-slider {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+/* ─── Search dropdown ─── */
+html.light .sf-suggest-dropdown {
+  background: rgba(255, 255, 255, 0.97);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+}
+html.light .sf-suggest-item {
+  color: rgba(0, 0, 0, 0.5);
+}
+html.light .sf-suggest-item:hover {
+  background: rgba(0, 0, 0, 0.04);
+  color: rgba(0, 0, 0, 0.8);
+}
+
+/* ─── Search chips ─── */
+html.light .sf-search-chip {
+  color: rgba(0, 0, 0, 0.4);
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+html.light .sf-search-chip:hover {
+  color: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+/* ─── Cards ─── */
+html.light .sf-card {
+  background: #fff;
+  border-color: rgba(0, 0, 0, 0.06);
+}
+html.light .sf-card:hover {
+  background: #fff;
+  border-color: rgba(244, 63, 94, 0.2);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
+}
+html.light .sf-card-thumb {
+  border-bottom-color: rgba(0, 0, 0, 0.04);
+}
+html.light .sf-card-remove {
+  background: rgba(255, 255, 255, 0.9);
+  border-color: rgba(0, 0, 0, 0.12);
+  color: rgba(0, 0, 0, 0.4);
+}
+html.light .sf-card-remove:hover {
+  color: #dc2626;
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* ─── Row ─── */
+html.light .sf-row:hover {
+  background: rgba(0, 0, 0, 0.03);
+}
+
+/* ─── Subtle button ─── */
+html.light .sf-btn-subtle {
+  color: rgba(0, 0, 0, 0.35);
+  border-color: rgba(0, 0, 0, 0.08);
+  background: rgba(0, 0, 0, 0.02);
+}
+html.light .sf-btn-subtle:hover {
+  color: rgba(0, 0, 0, 0.65);
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.12);
+}
+
+/* ─── Now Playing ─── */
+html.light .sf-now-playing {
+  border-color: rgba(0, 0, 0, 0.06);
+}
+html.light .sf-np-bg::after {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.65), rgba(255, 255, 255, 0.45));
+}
+html.light .sf-np-title {
+  color: rgba(0, 0, 0, 0.85);
+}
+html.light .sf-np-artist {
+  color: rgba(0, 0, 0, 0.4);
+}
+html.light .sf-np-art {
+  box-shadow:
+    0 8px 40px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(0, 0, 0, 0.06);
+}
+html.light .sf-np-vinyl-ring {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+html.light .sf-np-action-btn {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.4);
+}
+html.light .sf-np-action-btn:hover {
+  color: rgba(0, 0, 0, 0.75);
+  background: rgba(0, 0, 0, 0.08);
+}
+html.light .sf-visualizer span {
+  background: rgba(244, 63, 94, 0.15);
+}
+html.light .sf-visualizer--active span {
+  background: rgba(244, 63, 94, 0.55);
+}
+
+/* ─── Modals ─── */
+html.light .sf-modal {
+  background: rgba(255, 255, 255, 0.97);
+  border-color: rgba(0, 0, 0, 0.1);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.12),
+    0 0 0 1px rgba(0, 0, 0, 0.04) inset;
+}
+
+/* ─── Warning banner ─── */
+html.light .sf-banner-warn {
+  background: rgba(251, 191, 36, 0.08);
+  border-color: rgba(251, 191, 36, 0.2);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.06);
+}
+
+/* ─── Lyrics panel ─── */
+html.light .sf-lyrics-panel {
+  background: rgba(255, 255, 255, 0.97);
+  border-left-color: rgba(0, 0, 0, 0.08);
+  box-shadow: -12px 0 40px rgba(0, 0, 0, 0.06);
+}
+html.light .sf-lyrics-header {
+  border-bottom-color: rgba(0, 0, 0, 0.06);
+}
+html.light .sf-lyrics-text {
+  color: rgba(0, 0, 0, 0.5);
+}
+
+/* ─── Sleep timer ─── */
+html.light .sf-sleep-btn {
+  background: rgba(0, 0, 0, 0.02);
+  border-color: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.5);
+}
+html.light .sf-sleep-btn:hover {
+  background: rgba(244, 63, 94, 0.06);
+  border-color: rgba(244, 63, 94, 0.18);
+  color: #e11d48;
+}
+html.light .sf-sleep-btn span {
+  color: rgba(0, 0, 0, 0.25);
+}
+
+/* ─── Keyboard shortcuts ─── */
+html.light .sf-key {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.55);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.04);
+}
+html.light .sf-key-label {
+  color: rgba(0, 0, 0, 0.45);
+}
+
+/* ─── Toasts ─── */
+html.light .sf-toast {
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+}
+html.light .sf-toast--info {
+  background: rgba(59, 130, 246, 0.08);
+  border-color: rgba(59, 130, 246, 0.18);
+  color: #2563eb;
+}
+html.light .sf-toast--success {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.18);
+  color: #059669;
+}
+html.light .sf-toast--error {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.18);
+  color: #dc2626;
+}
+html.light .sf-toast--warn {
+  background: rgba(245, 158, 11, 0.08);
+  border-color: rgba(245, 158, 11, 0.18);
+  color: #b45309;
+}
+html.light .sf-confirm-yes {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #dc2626;
+}
+html.light .sf-confirm-yes:hover {
+  background: rgba(239, 68, 68, 0.2);
+  color: #b91c1c;
+}
+html.light .sf-confirm-no {
+  background: rgba(0, 0, 0, 0.04);
+  border-color: rgba(0, 0, 0, 0.1);
+  color: rgba(0, 0, 0, 0.4);
+}
+html.light .sf-confirm-no:hover {
+  background: rgba(0, 0, 0, 0.08);
+  color: rgba(0, 0, 0, 0.7);
+}
+
+/* ─── Skeleton loading ─── */
+html.light .sf-rec-skeleton-card {
+  border-color: rgba(0, 0, 0, 0.04);
+  background: rgba(0, 0, 0, 0.015);
+}
+html.light .sf-skel-thumb,
+html.light .sf-skel-line {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.03) 25%,
+    rgba(0, 0, 0, 0.06) 50%,
+    rgba(0, 0, 0, 0.03) 75%
+  );
+  background-size: 200% 100%;
+}
+
+/* ─── Spinner ─── */
+html.light .sf-spinner {
+  border-color: rgba(0, 0, 0, 0.08);
+  border-top-color: #e11d48;
+}
+
+/* ─── Dynamic theme ─── */
+html.light .sf-dynamic-theme .sf-player-bar::before {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsla(var(--sf-dyn-hue, 340), 60%, 50%, 0.12),
+    transparent
+  );
+}
+
+/* ─── Mobile sheet ─── */
+@media (max-width: 1023px) {
+  html.light .sf-sidebar {
+    border-top-color: rgba(0, 0, 0, 0.1) !important;
+    background: rgba(255, 255, 255, 0.98) !important;
+    box-shadow: 0 -12px 40px rgba(0, 0, 0, 0.08);
+  }
+  html.light .sf-sidebar::before {
+    background: rgba(0, 0, 0, 0.15);
+  }
+}
+html.light .sf-sheet-overlay {
+  background: rgba(0, 0, 0, 0.25);
+}
+html.light .sf-sheet-toggle {
+  color: rgba(0, 0, 0, 0.35);
+}
+html.light .sf-sheet-toggle:hover {
+  color: rgba(0, 0, 0, 0.7);
+  background: rgba(0, 0, 0, 0.05);
+}
+
+/* ─── Inline Tailwind bg overrides ─── */
+html.light [class*="bg-white/"] { --tw-bg-opacity: 1; }
+html.light .bg-white\/\[0\.03\],
+html.light .bg-white\/\[0\.04\] {
+  background: rgba(0, 0, 0, 0.03) !important;
+}
+html.light .bg-white\/5 { background: rgba(0, 0, 0, 0.04) !important; }
+html.light .bg-accent-500\/15 { background: rgba(244, 63, 94, 0.1) !important; }
+html.light .bg-accent-500\/10 { background: rgba(244, 63, 94, 0.08) !important; }
+html.light .hover\:bg-accent-500\/25:hover { background: rgba(244, 63, 94, 0.18) !important; }
+html.light .hover\:bg-white\/5:hover { background: rgba(0, 0, 0, 0.04) !important; }
+html.light .hover\:bg-cyan-500\/10:hover { background: rgba(6, 182, 212, 0.08) !important; }
+html.light .hover\:bg-accent-500\/10:hover { background: rgba(244, 63, 94, 0.08) !important; }
+
+/* ─── Inline Tailwind border overrides ─── */
+html.light .border-white\/\[0\.04\],
+html.light .border-white\/\[0\.05\] {
+  border-color: rgba(0, 0, 0, 0.06) !important;
+}
+html.light .border-white\/5 { border-color: rgba(0, 0, 0, 0.06) !important; }
+
+/* ─── Admin modal in light mode ─── */
+html.light .sf-btn-amber {
+  background: rgba(180, 130, 0, 0.1);
+  border-color: rgba(180, 130, 0, 0.18);
+  color: #92600a;
+}
+html.light .sf-btn-amber:hover {
+  background: rgba(180, 130, 0, 0.18);
+  border-color: rgba(180, 130, 0, 0.25);
+}
+html.light .sf-badge-admin {
+  background: rgba(180, 130, 0, 0.1);
+  color: #92600a;
+}
+
+/* ─── Ambient background blobs ─── */
+html.light .bg-accent-500\/\[0\.04\] { background: rgba(244, 63, 94, 0.02) !important; }
+html.light .bg-accent-400\/\[0\.03\] { background: rgba(251, 113, 133, 0.02) !important; }
+
+/* ─── Sidebar border ─── */
+html.light .border-t { border-top-color: rgba(0, 0, 0, 0.06) !important; }
+html.light .lg\:border-l { border-left-color: rgba(0, 0, 0, 0.06) !important; }

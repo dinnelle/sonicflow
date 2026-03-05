@@ -9,7 +9,7 @@ $uid = getUserId();
 $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'POST') {
-    $data = json_decode(file_get_contents('php://input'), true);
+    $data = json_decode(file_get_contents('php://input'), true) ?? [];
     $plId = (int) ($data['playlist_id'] ?? 0);
     $vid  = clean($data['video_id'] ?? '', 20);
     $title = clean($data['title'] ?? '', 200);

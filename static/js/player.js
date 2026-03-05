@@ -39,6 +39,53 @@ let sfDragSrcIdx = null;
 // Mobile sheet
 let sfSheetOpen = false;
 
+// ─── Persistence (Queue, Volume, Playback Modes) ───
+function sfSaveState() {
+  try {
+    localStorage.setItem(
+      "sf_state",
+      JSON.stringify({
+        queue: sfQueue,
+        qIdx: sfQIdx,
+        vol: sfPlayer && sfReady ? sfPlayer.getVolume() : 80,
+        shuffle: sfShuffleOn,
+        repeat: sfRepeatMode,
+      }),
+    );
+  } catch (e) {}
+}
+function sfRestoreState() {
+  try {
+    const s = JSON.parse(localStorage.getItem("sf_state"));
+    if (!s) return;
+    if (Array.isArray(s.queue) && s.queue.length) {
+      sfQueue = s.queue;
+      sfQIdx = typeof s.qIdx === "number" ? s.qIdx : -1;
+      sfRenderQ();
+    }
+    if (typeof s.vol === "number") {
+      const volEl = sfEl("sfVol");
+      if (volEl) volEl.value = s.vol;
+      if (sfReady) sfPlayer.setVolume(s.vol);
+      else
+        window._sfRestoredVol = s.vol;
+    }
+    if (s.shuffle) {
+      sfShuffleOn = true;
+      const btn = sfEl("sfShuffleBtn");
+      if (btn) btn.classList.add("sf-ctrl-btn--active");
+    }
+    if (s.repeat && s.repeat !== "none") {
+      sfRepeatMode = s.repeat;
+      const btn = sfEl("sfRepeatBtn");
+      if (btn) {
+        btn.classList.add("sf-ctrl-btn--active");
+        if (s.repeat === "one") btn.classList.add("sf-ctrl-btn--one");
+      }
+    }
+  } catch (e) {}
+}
+
 // ─── Invidious/Piped Search (No API Key, No Quota) ───
 const SF_INVIDIOUS_INSTANCES = [
   "https://inv.nadeko.net",
@@ -46,11 +93,15 @@ const SF_INVIDIOUS_INSTANCES = [
   "https://invidious.jing.rocks",
   "https://iv.datura.network",
   "https://invidious.privacyredirect.com",
+  "https://yewtu.be",
+  "https://vid.puffyan.us",
 ];
 const SF_PIPED_INSTANCES = [
   "https://pipedapi.kavin.rocks",
   "https://pipedapi.adminforge.de",
   "https://api.piped.yt",
+  "https://pipedapi.in.projectsegfau.lt",
+  "https://pipedapi.darkness.services",
 ];
 
 async function sfInvidiousSearch(query, maxResults = 20) {
@@ -120,7 +171,34 @@ async function sfInvidiousSearch(query, maxResults = 20) {
       continue;
     }
   }
-  // NO YouTube API fallback — quota protection
+  // Fallback: YouTube Data API (uses quota but always works)
+  if (SF_KEY) {
+    try {
+      const r = await fetch(
+        "https://www.googleapis.com/youtube/v3/search?part=snippet&type=video&maxResults=" +
+          maxResults +
+          "&q=" +
+          encodeURIComponent(query) +
+          "&key=" +
+          SF_KEY,
+        { signal: AbortSignal.timeout(8000) },
+      );
+      if (r.ok) {
+        const d = await r.json();
+        if (d.items?.length) {
+          return d.items.map((i) => ({
+            v: i.id.videoId,
+            t: sfEsc(i.snippet.title || ""),
+            c: sfEsc(i.snippet.channelTitle || ""),
+            th: i.snippet.thumbnails?.default?.url || "",
+            thHQ: i.snippet.thumbnails?.medium?.url || "",
+          }));
+        }
+      }
+    } catch (e) {
+      console.warn("YouTube API fallback failed:", e);
+    }
+  }
   return [];
 }
 
@@ -253,7 +331,9 @@ function onYouTubeIframeAPIReady() {
     events: {
       onReady: () => {
         sfReady = true;
-        sfPlayer.setVolume(80);
+        const vol = window._sfRestoredVol ?? 80;
+        sfPlayer.setVolume(vol);
+        delete window._sfRestoredVol;
       },
       onStateChange: (e) => {
         const st = e.data;
@@ -264,6 +344,7 @@ function onYouTubeIframeAPIReady() {
           sfEl("sfDisc").classList.add("vinyl-spinning");
           sfEl("sfPPBtn").classList.add("playing-pulse");
           sfUpdateNowPlaying(true);
+          if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "playing";
         } else if (st === 2) {
           sfIsPlaying = false;
           sfShowPause(false);
@@ -271,6 +352,7 @@ function onYouTubeIframeAPIReady() {
           sfEl("sfDisc").classList.remove("vinyl-spinning");
           sfEl("sfPPBtn").classList.remove("playing-pulse");
           sfUpdateNowPlaying(false);
+          if ("mediaSession" in navigator) navigator.mediaSession.playbackState = "paused";
         } else if (st === 0) {
           sfIsPlaying = false;
           sfShowPause(false);
@@ -347,6 +429,8 @@ function sfInitSearch() {
   input.addEventListener("input", () => {
     clearTimeout(sfDebounceTimer);
     const q = input.value.trim();
+    const clearBtn = sfEl("sfSearchClear");
+    if (clearBtn) clearBtn.classList.toggle("hidden", !q);
     if (q.length < 2) {
       sfHideSuggestions();
       return;
@@ -471,7 +555,7 @@ async function sfDoSearch() {
     '<div class="flex items-center justify-center py-20"><div class="sf-spinner mx-auto"></div></div>';
 
   try {
-    const results = await sfInvidiousSearch(q + " music", 20);
+    const results = await sfInvidiousSearch(q, 20);
     if (!results.length) {
       el.innerHTML =
         '<div class="flex flex-col items-center justify-center py-20"><p class="text-white/20 text-sm">No results found</p><p class="text-white/10 text-xs mt-1">Try different keywords or check your connection</p></div>';
@@ -501,7 +585,7 @@ async function sfLoadMoreResults() {
 
   try {
     sfInvPage++;
-    const newItems = await sfInvidiousSearch(sfCurrentQuery + " music", 20);
+    const newItems = await sfInvidiousSearch(sfCurrentQuery, 20);
     if (!newItems.length) {
       sfNextPageToken = null;
     } else {
@@ -610,6 +694,16 @@ function sfBuildCardHTML(v, t, c, th, thHQ) {
     sth +
     '\')" class="w-8 h-8 flex items-center justify-center bg-white/5 text-white/30 rounded-lg hover:text-cyan-400 hover:bg-cyan-500/10 transition-all" title="Add to queue">' +
     '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M12 5v14m-7-7h14"/></svg></button>' +
+    "<button onclick=\"event.stopPropagation();sfPlayNextInQ('" +
+    sv +
+    "','" +
+    st +
+    "','" +
+    sc +
+    "','" +
+    sth +
+    '\')" class="w-8 h-8 flex items-center justify-center bg-white/5 text-white/30 rounded-lg hover:text-emerald-400 hover:bg-emerald-500/10 transition-all" title="Play next">' +
+    '<svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0L21 12.75M17.25 9v12"/></svg></button>' +
     "<button onclick=\"event.stopPropagation();sfShowPlModal('" +
     sv +
     "','" +
@@ -762,6 +856,20 @@ function sfPlayNow(v, t, c, th) {
   sfLoadTrack(sfQIdx);
 }
 
+function sfPlayNextInQ(v, t, c, th) {
+  t = sfDecodeAttr(t);
+  c = sfDecodeAttr(c);
+  th = sfDecodeAttr(th);
+  if (sfQueue.some((x) => x.v === v)) {
+    sfToast("Already in queue", "info");
+    return;
+  }
+  const insertAt = sfQIdx >= 0 ? sfQIdx + 1 : sfQueue.length;
+  sfQueue.splice(insertAt, 0, { v, t, c, th });
+  sfRenderQ();
+  sfToast("Playing next", "success");
+}
+
 function sfLoadTrack(i) {
   if (!sfReady || i < 0 || i >= sfQueue.length) return;
   sfQIdx = i;
@@ -775,6 +883,38 @@ function sfLoadTrack(i) {
   sfApplyDynamicTheme(tr.v);
   sfCurrentLyrics = null;
   if (sfLyricsVisible) sfFetchLyrics(tr.t, tr.c);
+  sfUpdateMediaSession(tr);
+}
+
+function sfUpdateMediaSession(tr) {
+  if (!("mediaSession" in navigator)) return;
+  const thHQ = (tr.th || "")
+    .replace("default.jpg", "hqdefault.jpg")
+    .replace("/default.", "/hqdefault.");
+  navigator.mediaSession.metadata = new MediaMetadata({
+    title: tr.t,
+    artist: tr.c,
+    album: "SonicFlow",
+    artwork: [
+      {
+        src: tr.th || "",
+        sizes: "120x90",
+        type: "image/jpeg",
+      },
+      {
+        src: thHQ,
+        sizes: "480x360",
+        type: "image/jpeg",
+      },
+    ],
+  });
+  navigator.mediaSession.setActionHandler("play", () => sfToggle());
+  navigator.mediaSession.setActionHandler("pause", () => sfToggle());
+  navigator.mediaSession.setActionHandler("previoustrack", () => sfPrev());
+  navigator.mediaSession.setActionHandler("nexttrack", () => sfNext());
+  navigator.mediaSession.setActionHandler("seekto", (d) => {
+    if (sfReady && d.seekTime != null) sfPlayer.seekTo(d.seekTime, true);
+  });
 }
 
 function sfClearQueue() {
@@ -807,6 +947,7 @@ function sfRemoveQ(i) {
 }
 
 function sfRenderQ() {
+  sfSaveState();
   const el = sfEl("sfQueueEl");
   sfEl("sfQCount").textContent =
     sfQueue.length + " track" + (sfQueue.length !== 1 ? "s" : "");
@@ -862,6 +1003,11 @@ function sfRenderQ() {
         "</button></div>",
     )
     .join("");
+  // Scroll active track into view
+  requestAnimationFrame(() => {
+    const active = el.querySelector(".sf-queue-item--active");
+    if (active) active.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  });
 }
 
 // Drag & Drop
@@ -948,6 +1094,7 @@ function sfToggleShuffle() {
   const btn = sfEl("sfShuffleBtn");
   if (btn) btn.classList.toggle("sf-ctrl-btn--active", sfShuffleOn);
   sfToast(sfShuffleOn ? "Shuffle on" : "Shuffle off", "info");
+  sfSaveState();
 }
 
 function sfToggleRepeat() {
@@ -962,32 +1109,105 @@ function sfToggleRepeat() {
   }
   if (ico) ico.setAttribute("data-mode", sfRepeatMode);
   sfToast(labels[modes.indexOf(sfRepeatMode)], "info");
+  sfSaveState();
 }
 
-// Progress
+// Progress (cached DOM refs + draggable)
+let sfProgEl, sfThumbEl, sfTimeEl, sfProgWrap;
+let sfDraggingProgress = false;
+
+function sfCacheProgressEls() {
+  sfProgEl = sfProgEl || sfEl("sfProg");
+  sfThumbEl = sfThumbEl || sfEl("sfThumb");
+  sfTimeEl = sfTimeEl || sfEl("sfTime");
+  sfProgWrap = sfProgWrap || document.querySelector(".sf-progress-wrap");
+}
+
 function sfStartProgressTimer() {
   sfStopProgressTimer();
+  sfCacheProgressEls();
   sfProgressTimer = setInterval(() => {
+    if (sfDraggingProgress) return;
     const c = sfPlayer.getCurrentTime() || 0,
       d = sfPlayer.getDuration() || 0;
     if (d) {
       const p = (c / d) * 100 + "%";
-      sfEl("sfProg").style.width = p;
-      sfEl("sfThumb").style.left = p;
-      sfEl("sfTime").textContent = sfFmt(c) + " / " + sfFmt(d);
+      sfProgEl.style.width = p;
+      sfThumbEl.style.left = p;
+      sfTimeEl.textContent = sfFmt(c) + " / " + sfFmt(d);
+      if ("mediaSession" in navigator && navigator.mediaSession.setPositionState) {
+        try {
+          navigator.mediaSession.setPositionState({ duration: d, playbackRate: 1, position: c });
+        } catch (e) {}
+      }
     }
-  }, 400);
+  }, 200);
 }
 function sfStopProgressTimer() {
   clearInterval(sfProgressTimer);
 }
 function sfSeek(e) {
   if (!sfReady) return;
-  const r = e.currentTarget.getBoundingClientRect();
+  const r = (sfProgWrap || e.currentTarget).getBoundingClientRect();
   sfPlayer.seekTo(
     ((e.clientX - r.left) / r.width) * sfPlayer.getDuration(),
     true,
   );
+}
+
+// Draggable progress bar
+function sfInitProgressDrag() {
+  sfCacheProgressEls();
+  if (!sfProgWrap) return;
+
+  function seekFromEvent(e) {
+    const cx = e.touches ? e.touches[0].clientX : e.clientX;
+    const r = sfProgWrap.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (cx - r.left) / r.width));
+    const p = ratio * 100 + "%";
+    sfProgEl.style.width = p;
+    sfThumbEl.style.left = p;
+    if (sfReady) {
+      const d = sfPlayer.getDuration() || 0;
+      sfTimeEl.textContent = sfFmt(ratio * d) + " / " + sfFmt(d);
+    }
+    return ratio;
+  }
+
+  function onMove(e) {
+    if (!sfDraggingProgress) return;
+    e.preventDefault();
+    seekFromEvent(e);
+  }
+
+  function onEnd(e) {
+    if (!sfDraggingProgress) return;
+    sfDraggingProgress = false;
+    document.body.classList.remove("sf-dragging");
+    const cx = e.changedTouches ? e.changedTouches[0].clientX : e.clientX;
+    const r = sfProgWrap.getBoundingClientRect();
+    const ratio = Math.max(0, Math.min(1, (cx - r.left) / r.width));
+    if (sfReady) sfPlayer.seekTo(ratio * sfPlayer.getDuration(), true);
+    document.removeEventListener("mousemove", onMove);
+    document.removeEventListener("mouseup", onEnd);
+    document.removeEventListener("touchmove", onMove);
+    document.removeEventListener("touchend", onEnd);
+  }
+
+  sfProgWrap.addEventListener("mousedown", (e) => {
+    sfDraggingProgress = true;
+    document.body.classList.add("sf-dragging");
+    seekFromEvent(e);
+    document.addEventListener("mousemove", onMove);
+    document.addEventListener("mouseup", onEnd);
+  });
+  sfProgWrap.addEventListener("touchstart", (e) => {
+    sfDraggingProgress = true;
+    document.body.classList.add("sf-dragging");
+    seekFromEvent(e);
+    document.addEventListener("touchmove", onMove, { passive: false });
+    document.addEventListener("touchend", onEnd);
+  });
 }
 
 // ═══════════════════════════════════
@@ -1278,7 +1498,11 @@ function sfSharePlaylist(plId) {
       th: t.thumbnail,
     })),
   };
-  const encoded = btoa(unescape(encodeURIComponent(JSON.stringify(shareData))));
+  const encoded = btoa(
+    new TextEncoder()
+      .encode(JSON.stringify(shareData))
+      .reduce((s, b) => s + String.fromCharCode(b), ""),
+  );
   const shareUrl =
     window.location.origin + SF_BASE + "/player.php?shared=" + encoded;
 
@@ -1303,7 +1527,11 @@ function sfCheckSharedPlaylist() {
   if (!shared) return;
 
   try {
-    const data = JSON.parse(decodeURIComponent(escape(atob(shared))));
+    const data = JSON.parse(
+      new TextDecoder().decode(
+        Uint8Array.from(atob(shared), (c) => c.charCodeAt(0)),
+      ),
+    );
     if (data.n && Array.isArray(data.t) && data.t.length) {
       sfQueue = data.t.map((t) => ({ v: t.v, t: t.t, c: t.c, th: t.th }));
       sfQIdx = -1;
@@ -1576,6 +1804,16 @@ function sfHideShortcuts() {
 }
 
 document.addEventListener("keydown", (e) => {
+  // Ctrl+K / Cmd+K: focus search (works even when in input)
+  if ((e.ctrlKey || e.metaKey) && e.code === "KeyK") {
+    e.preventDefault();
+    const input = sfEl("sfSearchIn");
+    if (input) {
+      input.focus();
+      input.select();
+    }
+    return;
+  }
   if (e.target.tagName === "INPUT" || e.target.tagName === "TEXTAREA") return;
   switch (e.code) {
     case "Space":
@@ -1597,6 +1835,7 @@ document.addEventListener("keydown", (e) => {
         const v = Math.min(100, sfPlayer.getVolume() + 5);
         sfPlayer.setVolume(v);
         sfEl("sfVol").value = v;
+        sfSaveState();
       }
       break;
     case "ArrowDown":
@@ -1605,6 +1844,7 @@ document.addEventListener("keydown", (e) => {
         const v = Math.max(0, sfPlayer.getVolume() - 5);
         sfPlayer.setVolume(v);
         sfEl("sfVol").value = v;
+        sfSaveState();
       }
       break;
     case "KeyS":
@@ -1969,14 +2209,13 @@ async function sfLoadDashboard() {
     }
   } catch (e) {}
 
-  // Recommendations via Invidious/Piped (zero YouTube quota)
+  // Recommendations via Invidious/Piped (zero YouTube quota) — parallel
   var searchHistForRecs = sfGetSearchHistory();
-  if (searchHistForRecs.length) {
-    var forYouOk = await sfLoadForYou();
-    if (forYouOk) hasContent = true;
-  }
-  var artistOk = await sfLoadArtistMix();
-  if (artistOk) hasContent = true;
+  var recPromises = [];
+  if (searchHistForRecs.length) recPromises.push(sfLoadForYou());
+  recPromises.push(sfLoadArtistMix());
+  var recResults = await Promise.all(recPromises);
+  if (recResults.some(Boolean)) hasContent = true;
 
   var loader = sfEl("sfDashLoading");
   if (loader) loader.classList.add("hidden");
@@ -2065,9 +2304,38 @@ function sfRegisterSW() {
 }
 
 // ═══════════════════════════════════
+//  THEME TOGGLE
+// ═══════════════════════════════════
+function sfToggleTheme() {
+  const html = document.documentElement;
+  const isLight = html.classList.contains("light");
+  html.classList.remove("light", "dark");
+  html.classList.add(isLight ? "dark" : "light");
+  try {
+    localStorage.setItem("sf_theme", isLight ? "dark" : "light");
+  } catch (e) {}
+  sfToast(isLight ? "Dark mode" : "Light mode", "info");
+}
+
+// ═══════════════════════════════════
 //  INIT
 // ═══════════════════════════════════
+sfRestoreState();
 sfInitSearch();
+sfInitProgressDrag();
 sfLoadDashboard();
 sfCheckSharedPlaylist();
 sfRegisterSW();
+
+// Global image error fallback
+document.addEventListener(
+  "error",
+  (e) => {
+    if (e.target.tagName === "IMG" && !e.target.dataset.fallback) {
+      e.target.dataset.fallback = "1";
+      e.target.style.opacity = "0.3";
+      e.target.style.background = "var(--sf-surface, #1a1a1a)";
+    }
+  },
+  true,
+);

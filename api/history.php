@@ -1,7 +1,7 @@
 <?php
 require_once __DIR__ . '/../includes/auth.php';
 initSession();
-requireLogin();
+requireAPILogin();
 
 $db = getDB();
 $userId = getUserId();
@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 // POST: record a play (skip if same video played within 5 minutes)
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     requireCSRF();
-    $data = json_decode(file_get_contents('php://input'), true);
+    $data = json_decode(file_get_contents('php://input'), true) ?? [];
     $videoId = clean($data['video_id'] ?? '', 20);
     $title = clean($data['title'] ?? '', 200);
     $channel = clean($data['channel'] ?? '', 100);

@@ -182,7 +182,8 @@ CREATE TABLE `sf_users` (
 -- Dumping data for table `sf_users`
 --
 
-INSERT INTO `sf_users` (`id`, `username`, `email`, `password_hash`, `role`, `created_at`) 
+INSERT INTO `sf_users` (`id`, `username`, `email`, `password_hash`, `role`, `created_at`) VALUES
+(1, 'dinnes', '', '$2y$12$xGSp9s2btBk9HnBafOlh1.syM3b1LYw7RJPrw3hugDfoNiybQLlbi', 'user', '2026-02-19 15:17:15');
 
 --
 -- Indexes for dumped tables

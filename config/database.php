@@ -6,8 +6,8 @@ define('DB_NAME', 'sonic');
 define('DB_USER', 'root');
 define('DB_PASS', '');
 
-// ─── Base Path (change if app is in a subfolder) ───
-define('BASE_PATH', '/projects/sonicflow');
+// ─── Base Path (auto-detect: empty for domain root, subfolder for localhost) ───
+define('BASE_PATH', in_array($_SERVER['HTTP_HOST'] ?? '', ['localhost', '127.0.0.1']) ? '/projects/sonicflow' : '');
 
 // ─── Security Config ───
 define('MAX_LOGIN_ATTEMPTS', 5);
